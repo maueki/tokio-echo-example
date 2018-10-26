@@ -2,6 +2,8 @@ use tokio::prelude::*;
 use tokio::net::UdpSocket;
 use std::net::SocketAddr;
 
+use futures::try_ready;
+
 struct EchoServer {
     socket: UdpSocket,
     buf: Vec<u8>,
@@ -15,17 +17,12 @@ impl EchoServer {
 
 impl Future for EchoServer {
     type Item = ();
-    type Error = ();
+    type Error = std::io::Error;
 
-    fn poll(&mut self) -> Poll<(), ()> {
-        match self.socket.poll_recv_from(&mut self.buf) {
-            Ok(Async::Ready((_size, _peer))) => {
-                println!("recv");
-                Ok(Async::Ready(()))
-            },
-            Ok(Async::NotReady) => Ok(Async::NotReady),
-            Err(_) => Err(()),
-        }
+    fn poll(&mut self) -> Poll<(), std::io::Error> {
+        let _ = try_ready!(self.socket.poll_recv_from(&mut self.buf));
+        println!("connect");
+        Ok(Async::Ready(()))
     }
 }
 
@@ -36,5 +33,5 @@ fn main() {
 
     let server = EchoServer::new(socket);
 
-    tokio::run(server);
+    tokio::run(server.map_err(|_| ()));
 }
