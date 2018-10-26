@@ -1,0 +1,10 @@
+[package]
+name = "tokio-echo"
+version = "0.1.0"
+authors = ["Ueki Masaru <masaru.ueki@itage.co.jp>"]
+edition = "2018"
+
+[dependencies]
+tokio = "*"
+bytes = "*"
+futures = "*"
