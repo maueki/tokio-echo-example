@@ -23,7 +23,10 @@ impl Future for EchoServer {
                 println!("recv");
                 Ok(Async::Ready(()))
             },
-            Ok(Async::NotReady) => Ok(Async::NotReady),
+            Ok(Async::NotReady) => {
+                println!("not ready");
+                Ok(Async::NotReady)
+            },
             Err(_) => Err(()),
         }
     }
