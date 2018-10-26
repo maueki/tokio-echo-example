@@ -5,6 +5,7 @@ authors = ["Ueki Masaru <masaru.ueki@itage.co.jp>"]
 edition = "2018"
 
 [dependencies]
-tokio = "*"
-bytes = "*"
-futures = "*"
+tokio = { git = "https://github.com/tokio-rs/tokio", features=["async-await-preview"] }
+tokio-async-await = { git = "https://github.com/tokio-rs/tokio" }
+tokio-tcp = { git = "https://github.com/tokio-rs/tokio" }
+futures-preview = "0.3.0-alpha.9"
