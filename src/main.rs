@@ -7,11 +7,12 @@ use futures::try_ready;
 struct EchoServer {
     socket: UdpSocket,
     buf: Vec<u8>,
+    to_send: Option<(usize, SocketAddr)>,
 }
 
 impl EchoServer {
     fn new(socket: UdpSocket) -> EchoServer {
-        EchoServer{socket: socket, buf: vec![0; 1024]}
+        EchoServer{socket: socket, buf: vec![0; 1024], to_send: None}
     }
 }
 
@@ -20,9 +21,17 @@ impl Future for EchoServer {
     type Error = std::io::Error;
 
     fn poll(&mut self) -> Poll<(), std::io::Error> {
-        let _ = try_ready!(self.socket.poll_recv_from(&mut self.buf));
-        println!("connect");
-        Ok(Async::Ready(()))
+        loop {
+            if self.to_send == None {
+                self.to_send = Some(try_ready!(self.socket.poll_recv_from(&mut self.buf)));
+            }
+
+            if let Some((size, peer)) = self.to_send {
+                let amt = try_ready!(self.socket.poll_send_to(&self.buf[..size], &peer));
+                println!("Echoed {}/{} bytes to {}", amt, size, peer);
+                self.to_send = None;
+            }
+        }
     }
 }
 
